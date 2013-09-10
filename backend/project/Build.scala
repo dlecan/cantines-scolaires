@@ -11,7 +11,7 @@ object ApplicationBuild extends Build {
     // Add your project dependencies here,
     jdbc,
     anorm,
-    "com.lowagie" % "itext" % "4.2.1"
+    "com.itextpdf" % "itextpdf" % "5.4.3"
   )
 
 
