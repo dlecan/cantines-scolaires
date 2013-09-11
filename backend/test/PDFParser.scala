@@ -3,27 +3,28 @@ import java.io.IOException
 import java.io.PrintWriter
 
 import com.itextpdf.text.pdf.PdfReader
-import com.itextpdf.text.pdf.parser.PdfReaderContentParser
-import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy
-import com.itextpdf.text.pdf.parser.TextExtractionStrategy
+import com.itextpdf.text.pdf.parser.{LocationTextExtractionStrategy, PdfReaderContentParser, SimpleTextExtractionStrategy, TextExtractionStrategy}
 
 object ExtractPageContent {
 
-  def parsePdf(pdf: String, txt: String) = {
+  def parsePdf(pdf: String) = {
     val reader = new PdfReader(pdf)
     val parser = new PdfReaderContentParser(reader)
-    val out = new PrintWriter(new FileOutputStream(txt))
-//    for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-    (1 until reader.getNumberOfPages()).foreach {
+    val out = new PrintWriter(System.out)
+
+    println("Number of pages found: " + reader.getNumberOfPages)
+
+    (1 to reader.getNumberOfPages).foreach {
       i =>
-      val strategy = parser.processContent(i, new SimpleTextExtractionStrategy())
-      out.println(strategy.getResultantText())
+        println(s"Page number $i")
+        val strategy = parser.processContent(i, new LocationTextExtractionStrategy)
+        out.println(strategy.getResultantText())
     }
     out.flush()
     out.close()
   }
 
   def main(args: Array[String]) = {
-    new ExtractPageContent().parsePdf(PREFACE, RESULT)
+    ExtractPageContent.parsePdf(getClass.getResource("/menu.pdf").toExternalForm)
   }
 }
