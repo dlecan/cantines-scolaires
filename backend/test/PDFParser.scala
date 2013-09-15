@@ -6,36 +6,40 @@ import com.itextpdf.text.pdf.parser._
 
 object ExtractPageContent {
 
-  val xOffset = 59
-  val yOffset = 48
+  val xOffset = 80
+  val yOffset = 16
 
-  val rowWidth = 159
-  val colHeigth = 119
+  val rowWidth = 160
+  val colHeigth = 121
 
-  def parsePdf(pdf: String) = {
+  def parsePdf(pdf: String): List[String] = {
     val reader = new PdfReader(pdf)
 
-    for {
+    val results = for {
       row <- 0 to 3
       col <- 0 to 4
     } yield {
       val rect = getRectangle(row, col)
-      println(s"($row, $col) =================================================================================")
-      println(rect.betterToString)
-      println()
-
       val filter = new RegionTextRenderFilter(rect)
       val strategy = new FilteredTextRenderListener(new LocationTextExtractionStrategy(), filter)
 
-      println(PdfTextExtractor.getTextFromPage(reader, 1, strategy))
-      println("=================================================================================")
-      println()
+      PdfTextExtractor.getTextFromPage(reader, 1, strategy)
     }
     reader.close()
+    results.toList
   }
 
   def main(args: Array[String]) = {
-    ExtractPageContent.parsePdf(getClass.getResource("/menu.pdf").toExternalForm)
+    val results = ExtractPageContent.parsePdf(getClass.getResource("/menu.pdf").toExternalForm)
+
+    results.foreach {
+      r =>
+        println("=================================================================================")
+        println(r)
+        println("=================================================================================")
+        println()
+    }
+
   }
 
   def getRectangle(row: Int, col: Int) = {
