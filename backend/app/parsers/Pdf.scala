@@ -4,7 +4,7 @@ import java.net.URL
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.{PdfTextExtractor, LocationTextExtractionStrategy, FilteredTextRenderListener, RegionTextRenderFilter}
 import com.itextpdf.text.Rectangle
-import org.joda.time.{Weeks, LocalDate, DateTime}
+import org.joda.time.{LocalDate, DateTime}
 import org.joda.time.format.DateTimeFormatterBuilder
 
 case class FichierMenus(du: LocalDate, au: LocalDate, listeMenus: List[String])
