@@ -22,7 +22,7 @@ trait ITextPdfParserComponent extends PdfParserComponent {
     val yOffset = 16
 
     val rowWidth = 160
-    val colHeigth = 121
+    val colHeight = 121
   }
 
   class ITextPdfParser extends PdfParser {
@@ -47,7 +47,7 @@ trait ITextPdfParserComponent extends PdfParserComponent {
     }
 
     private def getRectangle(row: Int, col: Int) = {
-      def xRow(x: Int) = xOffset + x * colHeigth
+      def xRow(x: Int) = xOffset + x * colHeight
       def yCol(y: Int) = yOffset + y * rowWidth
 
       new Rectangle(xRow(row), yCol(col), xRow(row + 1), yCol(col + 1))
