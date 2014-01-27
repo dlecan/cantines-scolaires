@@ -7,27 +7,24 @@ import com.itextpdf.text.Rectangle
 import org.joda.time.{LocalDate, DateTime}
 import org.joda.time.format.DateTimeFormatterBuilder
 
-case class FichierMenus(du: LocalDate, au: LocalDate, listeMenus: List[String])
+case class FichierMenus(du: LocalDate, au: LocalDate, menus: List[String])
 
-trait PdfParserComponent {
-  val pdfParser: PdfParser
+trait FichierMenusParserComponent {
+
+  val menusParser: FichierMenusParser
+
 }
 
-trait PdfParser {
-  def parsePdf(url: URL): FichierMenus
+trait FichierMenusParser {
+  def parse(url: URL): FichierMenus
 }
 
-trait ITextPdfParserComponent extends PdfParserComponent {
+trait FichierMenusParserComponentImpl extends FichierMenusParserComponent {
+  self: PdfParserComponent =>
 
-  override val pdfParser: PdfParser = new ITextPdfParser
+  override val menusParser: FichierMenusParser = new FichierMenusParserImpl()
 
-  object ITextPdfParser {
-    val xOffset = 80
-    val yOffset = 16
-
-    val rowWidth = 160
-    val colHeight = 121
-
+  object FichierMenusParserImpl {
     // Trying to match "Menus du 2 au 27 septembre" or "Menus du 27 janvier au 21 février"
     val TitleRegexPattern = """Menus\s+du\s+(\d{1,2})\s*(\p{L}+)?\s*au\s+(\d{1,2})\s+(\p{L}+)""" r
 
@@ -40,14 +37,74 @@ trait ITextPdfParserComponent extends PdfParserComponent {
       .toFormatter()
   }
 
+  class FichierMenusParserImpl extends FichierMenusParser {
+
+    import FichierMenusParserImpl._
+
+    override def parse(url: URL): FichierMenus = {
+
+      val donneesBrutes = pdfParser.parsePdf(url)
+
+      val (du, au) = extractDates(donneesBrutes.titre)
+
+      new FichierMenus(du, au, donneesBrutes.menus)
+    }
+
+    private def extractDates(title: String): (LocalDate, LocalDate) = {
+
+      def getDate(year: Int, mois: String, jour: String): LocalDate = {
+        dateTimeParser.parseDateTime(s"$year $mois $jour").toLocalDate
+      }
+
+      val year = DateTime.now().getYear()
+
+      title match {
+        case TitleRegexPattern(duStr, null, auStr, moisCommunStr) =>
+          val du = getDate(year, moisCommunStr, duStr)
+          val au = getDate(year, moisCommunStr, auStr)
+          (du, au)
+        case TitleRegexPattern(duStr, mois1Str, auStr, mois2Str) =>
+          val du = getDate(year, mois1Str, duStr)
+          val au = getDate(year, mois2Str, auStr)
+          (du, au)
+      }
+    }
+
+  }
+
+}
+
+
+case class DonneesBrutes(titre: String, menus: List[String])
+
+trait PdfParserComponent {
+  val pdfParser: PdfParser
+}
+
+trait PdfParser {
+  def parsePdf(url: URL): DonneesBrutes
+}
+
+trait ITextPdfParserComponent extends PdfParserComponent {
+
+  override val pdfParser: PdfParser = new ITextPdfParser
+
+  object ITextPdfParser {
+    val xOffset = 80
+    val yOffset = 16
+
+    val rowWidth = 160
+    val colHeight = 121
+  }
+
   class ITextPdfParser extends PdfParser {
 
     import ITextPdfParser._
 
-    override def parsePdf(url: URL): FichierMenus = {
+    override def parsePdf(url: URL): DonneesBrutes = {
       val reader = new PdfReader(url)
 
-      val (du, au) = extractDates(reader)
+      val title = extractTextFromRectangle(reader, new Rectangle(0, 0, 80, 800)).trim
 
       // Extract list of menus
       val listeMenus = for {
@@ -58,28 +115,7 @@ trait ITextPdfParserComponent extends PdfParserComponent {
       }
 
       reader.close()
-      new FichierMenus(du, au, listeMenus.toList)
-    }
-
-    private def extractDates(reader: PdfReader): (LocalDate, LocalDate) = {
-
-      def getDate(year: Int, mois: String, jour: String): LocalDate = {
-        dateTimeParser.parseDateTime(s"$year $mois $jour").toLocalDate
-      }
-
-      val year = DateTime.now().getYear()
-
-      val title = extractTextFromRectangle(reader, new Rectangle(0, 0, 80, 800))
-      title.trim match {
-        case TitleRegexPattern(duStr, null, auStr, moisCommunStr) =>
-          val du = getDate(year, moisCommunStr, duStr)
-          val au = getDate(year, moisCommunStr, auStr)
-          (du, au)
-        case TitleRegexPattern(duStr, mois1Str, auStr, mois2Str) =>
-          val du = getDate(year, mois1Str, duStr)
-          val au = getDate(year, mois2Str, auStr)
-          (du, au)
-      }
+      new DonneesBrutes(title, listeMenus.toList)
     }
 
     private def extractTextFromRectangle(reader: PdfReader, row: Int, col: Int): String = {

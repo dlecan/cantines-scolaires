@@ -11,7 +11,8 @@ object ApplicationBuild extends Build {
     // Add your project dependencies here,
     jdbc,
     anorm,
-    "com.itextpdf" % "itextpdf" % "5.4.3"
+    "com.itextpdf" % "itextpdf" % "5.4.3",
+    "org.mockito" % "mockito-core" % "1.9.5"
   )
 
 
