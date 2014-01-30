@@ -1,9 +1,9 @@
 import org.joda.time.{DateTime, LocalDate}
-import org.mockito.Mockito._
 import org.specs2.mutable._
 import org.specs2.mock._
 
 import parsers._
+import parsers.DonneesBrutes
 
 /**
  * Add your spec here.
@@ -34,16 +34,17 @@ class PdfParserSpec
 }
 
 class FichierMenusParserSpec
-  extends Specification
-  with Mockito
+  extends Specification {
+
+  trait TestComponent extends Mockito
   with FichierMenusParserComponentImpl
   with PdfParserComponent {
-
-  override val pdfParser: PdfParser = mock[PdfParser]
+    override val pdfParser: PdfParser = mock[PdfParser]
+  }
 
   "Menus parsers" should {
 
-    "Be able to parse a title with two dates and only one month" in {
+    "Be able to parse a title with two dates and only one month" in new TestComponent {
 
       val url = getClass.getResource("/S36-37-38-39.pdf")
       val expected = new DonneesBrutes("Menus du 2 au 27 septembre", List())
@@ -56,7 +57,7 @@ class FichierMenusParserSpec
       result.au === new LocalDate(DateTime.now().getYear(), 9, 27)
     }
 
-    "Be able to parse a title with two dates and two months" in {
+    "Be able to parse a title with two dates and two months" in new TestComponent {
 
       val url = getClass.getResource("/S36-37-38-39.pdf")
       val expected = new DonneesBrutes("Menus du 27 janvier au 21 février", List())
