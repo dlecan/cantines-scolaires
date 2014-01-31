@@ -45,6 +45,8 @@ class FichierMenusParserSpec
     override val pdfParser: PdfParser = mock[PdfParser]
   }
 
+  def buildLocalDate(monthInYear: Int, dayInMonth: Int): LocalDate = new LocalDate(DateTime.now().getYear, monthInYear, dayInMonth)
+
   "Menus parsers" should {
 
     "Be able to parse a title with two dates and only one month" in new TestComponent {
@@ -56,8 +58,8 @@ class FichierMenusParserSpec
 
       val result = menusParser.parse(url)
 
-      result.du === new LocalDate(DateTime.now().getYear, 9, 2)
-      result.au === new LocalDate(DateTime.now().getYear, 9, 27)
+      result.du === buildLocalDate(9, 2)
+      result.au === buildLocalDate(9, 27)
     }
 
     "Be able to parse a title with two dates and two months" in new TestComponent {
@@ -69,8 +71,8 @@ class FichierMenusParserSpec
 
       val result = menusParser.parse(url)
 
-      result.du === new LocalDate(DateTime.now().getYear, 1, 27)
-      result.au === new LocalDate(DateTime.now().getYear, 2, 21)
+      result.du === buildLocalDate(1, 27)
+      result.au === buildLocalDate(2, 21)
     }
 
   }
