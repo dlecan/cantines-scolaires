@@ -2,6 +2,7 @@ import org.joda.time.{DateTime, LocalDate}
 import org.specs2.mutable._
 import org.specs2.mock._
 
+import org.specs2.specification.Scope
 import parsers._
 import parsers.DonneesBrutes
 
@@ -36,9 +37,11 @@ class PdfParserSpec
 class FichierMenusParserSpec
   extends Specification {
 
-  trait TestComponent extends Mockito
-  with FichierMenusParserComponentImpl
-  with PdfParserComponent {
+  trait TestComponent
+    extends Mockito
+    with FichierMenusParserComponentImpl
+    with PdfParserComponent
+    with Scope {
     override val pdfParser: PdfParser = mock[PdfParser]
   }
 
@@ -53,8 +56,8 @@ class FichierMenusParserSpec
 
       val result = menusParser.parse(url)
 
-      result.du === new LocalDate(DateTime.now().getYear(), 9, 2)
-      result.au === new LocalDate(DateTime.now().getYear(), 9, 27)
+      result.du === new LocalDate(DateTime.now().getYear, 9, 2)
+      result.au === new LocalDate(DateTime.now().getYear, 9, 27)
     }
 
     "Be able to parse a title with two dates and two months" in new TestComponent {
@@ -66,8 +69,8 @@ class FichierMenusParserSpec
 
       val result = menusParser.parse(url)
 
-      result.du === new LocalDate(DateTime.now().getYear(), 1, 27)
-      result.au === new LocalDate(DateTime.now().getYear(), 2, 21)
+      result.du === new LocalDate(DateTime.now().getYear, 1, 27)
+      result.au === new LocalDate(DateTime.now().getYear, 2, 21)
     }
 
   }
