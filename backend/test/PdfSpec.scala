@@ -4,49 +4,52 @@ import org.specs2.mutable._
 import org.specs2.specification.Scope
 import parsers._
 
-/**
- * Add your spec here.
- * You can mock out a whole application including requests, plugins etc.
- * For more information, consult the wiki.
- */
+trait DataSet {
+
+  val expectedStrMenu1PDF1 = "Lundi 2 \nCentres de loisirs \n \n \nPique-nique "
+  val expectedStrMenu2PDF1 = "Mardi 3 \nSalade verte / demi-œuf \nPaëlla au poulet \net fruits de mer \nFromage blanc / \nAbricots secs° "
+  val expectedStrMenu3PDF1 = "Mardi 17 \nTaboulé \nSauté \nde bœuf* bourguignon \nCarottes \nCrème de gruyère \nPrunes "
+
+
+  val expectedStrMenu1PDF2 = "Lundi 27 \nTarte au fromage \nSaucisse de Toulouse \nHaricots verts \nKiwi bio☺ "
+  val expectedStrMenu2PDF2 = "Lundi 3 \nEndives au thon \nPetits panés de volaille \nChoux fleurs au gratin \nTomme noire \nTarte grillée aux fruits "
+  val expectedStrMenu3PDF2 = "Vendredi 7 \nDés de betteraves \nDos de lieu \nau beurre blanc \nPommes \n de terre sautées \nFromage Champanet \nAnanas "
+
+  val expectedMenu1PDF1 = Menu(buildLocalDate(9, 2), "Centres de loisirs \n \n \nPique-nique ")
+  val expectedMenu2PDF1 = Menu(buildLocalDate(9, 3), "Salade verte / demi-œuf \nPaëlla au poulet \net fruits de mer \nFromage blanc / \nAbricots secs° ")
+  val expectedMenu3PDF1 = Menu(buildLocalDate(9, 17), "Taboulé \nSauté \nde bœuf* bourguignon \nCarottes \nCrème de gruyère \nPrunes ")
+
+  def buildLocalDate(monthInYear: Int, dayInMonth: Int): LocalDate = new LocalDate(DateTime.now().getYear, monthInYear, dayInMonth)
+
+}
+
 class PdfParserSpec
   extends Specification
-  with ITextPdfParserComponent {
+  with ITextPdfParserComponent
+  with DataSet {
 
   "PDF parsers" should {
 
     "Be able to parse the PDF S36-37-38-39.pdf" in {
 
-      val expectedMenu1 = "Lundi 2 \nCentres de loisirs \n \n \nPique-nique "
-
-      val expectedMenu2 = "Mardi 3 \nSalade verte / demi-œuf \nPaëlla au poulet \net fruits de mer \nFromage blanc / \nAbricots secs° "
-
-      val expectedMenu3 = "Mardi 17 \nTaboulé \nSauté \nde bœuf* bourguignon \nCarottes \nCrème de gruyère \nPrunes "
-
       val (titre, menus) = pdfParser.parsePdf(getClass.getResource("/S36-37-38-39.pdf"))
       titre === "Menus du 2 au 27 septembre"
       menus must have size 20
 
-      menus(0) === expectedMenu1
-      menus(1) === expectedMenu2
-      menus(11) === expectedMenu3
+      menus(0) === expectedStrMenu1PDF1
+      menus(1) === expectedStrMenu2PDF1
+      menus(11) === expectedStrMenu3PDF1
     }
 
     "Be able to parse the PDF S5-6-7-8.pdf" in {
-
-      val expectedMenu1 = "Lundi 27 \nTarte au fromage \nSaucisse de Toulouse \nHaricots verts \nKiwi bio☺ "
-
-      val expectedMenu2 = "Lundi 3 \nEndives au thon \nPetits panés de volaille \nChoux fleurs au gratin \nTomme noire \nTarte grillée aux fruits "
-
-      val expectedMenu3 = "Vendredi 7 \nDés de betteraves \nDos de lieu \nau beurre blanc \nPommes \n de terre sautées \nFromage Champanet \nAnanas "
 
       val (titre, menus) = pdfParser.parsePdf(getClass.getResource("/S5-6-7-8.pdf"))
       titre === "Menus du 27 janvier au 21 février"
       menus must have size 20
 
-      menus(0) === expectedMenu1
-      menus(5) === expectedMenu2
-      menus(9) === expectedMenu3
+      menus(0) === expectedStrMenu1PDF2
+      menus(5) === expectedStrMenu2PDF2
+      menus(9) === expectedStrMenu3PDF2
 
     }
 
@@ -54,7 +57,8 @@ class PdfParserSpec
 }
 
 class FichierMenusParserSpec
-  extends Specification {
+  extends Specification
+  with DataSet {
 
   trait TestComponent
     extends MenusForPeriodParserComponentImpl
@@ -63,8 +67,6 @@ class FichierMenusParserSpec
     with Scope {
 //    override val pdfParser: PdfParser = mock[PdfParser]
   }
-
-  def buildLocalDate(monthInYear: Int, dayInMonth: Int): LocalDate = new LocalDate(DateTime.now().getYear, monthInYear, dayInMonth)
 
   "Menus parsers" should {
 
@@ -76,6 +78,10 @@ class FichierMenusParserSpec
 
       result.du === buildLocalDate(9, 2)
       result.au === buildLocalDate(9, 27)
+
+      result.menus(0) === expectedMenu1PDF1
+      result.menus(1) === expectedMenu2PDF1
+      result.menus(11) === expectedMenu3PDF1
     }
 
     "Be able to parse a title with two dates and two months" in new TestComponent {

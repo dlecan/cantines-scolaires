@@ -47,9 +47,7 @@ trait MenusForPeriodParserComponentImpl extends FichierMenusParserComponent {
 
       val (du, au) = parseTitleDate(titre)
 
-      // TODO extract dates form each menus
-
-      MenusForPeriod(du, au, List())
+      MenusForPeriod(du, au, menus.map(parseIndividualTitleDate(_, du, au)))
     }
 
     private def parseTitleDate(title: String): (LocalDate, LocalDate) = {
@@ -72,10 +70,14 @@ trait MenusForPeriodParserComponentImpl extends FichierMenusParserComponent {
       }
     }
 
-    private def parseIndividualTitleDate(strMenu: String): Menu = {
-//      strMenu.
+    private def parseIndividualTitleDate(strMenu: String, du: LocalDate, au: LocalDate): Menu = {
+      val firstLF = strMenu.indexOf('\n')
 
-      ???
+      val title = strMenu.subSequence(0, firstLF)
+
+      val textMenu = strMenu.subSequence(firstLF + 1, strMenu.size)
+
+      Menu(null, textMenu.toString)
     }
 
   }
