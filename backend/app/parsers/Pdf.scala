@@ -7,22 +7,24 @@ import com.itextpdf.text.Rectangle
 import org.joda.time.{LocalDate, DateTime}
 import org.joda.time.format.DateTimeFormatterBuilder
 
-case class FichierMenus(du: LocalDate, au: LocalDate, menus: List[String])
+case class Menu(date: LocalDate, menu: String)
+
+case class MenusForPeriod(du: LocalDate, au: LocalDate, menus: List[Menu])
 
 trait FichierMenusParserComponent {
 
-  val menusParser: FichierMenusParser
+  val menusParser: MenusForPeriodParser
 
 }
 
-trait FichierMenusParser {
-  def parse(url: URL): FichierMenus
+trait MenusForPeriodParser {
+  def parse(titre: String, menus: List[String]): MenusForPeriod
 }
 
-trait FichierMenusParserComponentImpl extends FichierMenusParserComponent {
-  self: PdfParserComponent =>
+trait MenusForPeriodParserComponentImpl extends FichierMenusParserComponent {
+//  self: PdfParserComponent =>
 
-  override val menusParser: FichierMenusParser = new FichierMenusParserImpl()
+  override val menusParser: MenusForPeriodParser = new MenusForPeriodParserImpl()
 
   object FichierMenusParserImpl {
     // Trying to match "Menus du 2 au 27 septembre" or "Menus du 27 janvier au 21 février"
@@ -37,20 +39,20 @@ trait FichierMenusParserComponentImpl extends FichierMenusParserComponent {
       .toFormatter()
   }
 
-  class FichierMenusParserImpl extends FichierMenusParser {
+  class MenusForPeriodParserImpl extends MenusForPeriodParser {
 
     import FichierMenusParserImpl._
 
-    override def parse(url: URL): FichierMenus = {
+    override def parse(titre: String, menus: List[String]): MenusForPeriod = {
 
-      val donneesBrutes = pdfParser.parsePdf(url)
+      val (du, au) = parseTitleDate(titre)
 
-      val (du, au) = extractDates(donneesBrutes.titre)
+      // TODO extract dates form each menus
 
-      new FichierMenus(du, au, donneesBrutes.menus)
+      MenusForPeriod(du, au, List())
     }
 
-    private def extractDates(title: String): (LocalDate, LocalDate) = {
+    private def parseTitleDate(title: String): (LocalDate, LocalDate) = {
 
       def getDate(year: Int, mois: String, jour: String): LocalDate = {
         dateTimeParser.parseDateTime(s"$year $mois $jour").toLocalDate
@@ -70,19 +72,23 @@ trait FichierMenusParserComponentImpl extends FichierMenusParserComponent {
       }
     }
 
+    private def parseIndividualTitleDate(strMenu: String): Menu = {
+//      strMenu.
+
+      ???
+    }
+
   }
 
 }
 
-
-case class DonneesBrutes(titre: String, menus: List[String])
 
 trait PdfParserComponent {
   val pdfParser: PdfParser
 }
 
 trait PdfParser {
-  def parsePdf(url: URL): DonneesBrutes
+  def parsePdf(url: URL): (String, List[String])
 }
 
 trait ITextPdfParserComponent extends PdfParserComponent {
@@ -101,7 +107,7 @@ trait ITextPdfParserComponent extends PdfParserComponent {
 
     import ITextPdfParser._
 
-    override def parsePdf(url: URL): DonneesBrutes = {
+    override def parsePdf(url: URL): (String, List[String]) = {
       val reader = new PdfReader(url)
 
       val title = extractTextFromRectangle(reader, new Rectangle(0, 0, 80, 800)).trim
@@ -115,7 +121,7 @@ trait ITextPdfParserComponent extends PdfParserComponent {
       }
 
       reader.close()
-      new DonneesBrutes(title, listeMenus.toList)
+      (title, listeMenus.toList)
     }
 
     private def extractTextFromRectangle(reader: PdfReader, row: Int, col: Int): String = {
