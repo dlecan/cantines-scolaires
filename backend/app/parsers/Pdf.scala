@@ -6,6 +6,7 @@ import com.itextpdf.text.pdf.parser.{PdfTextExtractor, LocationTextExtractionStr
 import com.itextpdf.text.Rectangle
 import org.joda.time.{LocalDate, DateTime}
 import org.joda.time.format.DateTimeFormatterBuilder
+import scala.annotation.tailrec
 
 case class Menu(date: LocalDate, menu: String)
 
@@ -30,6 +31,9 @@ trait MenusForPeriodParserComponentImpl extends FichierMenusParserComponent {
     // Trying to match "Menus du 2 au 27 septembre" or "Menus du 27 janvier au 21 février"
     val TitleRegexPattern = """Menus\s+du\s+(\d{1,2})\s*(\p{L}+)?\s*au\s+(\d{1,2})\s+(\p{L}+)""" r
 
+    // Trying to match "Lundi 2" or "Vendredi 27"
+    val DayTitleRegexPattern = """\p{L}+\s+(\d{1,2})\s*""" r
+
     val dateTimeParser = new DateTimeFormatterBuilder()
       .appendYear(4, 4)
       .appendLiteral(' ')
@@ -47,7 +51,11 @@ trait MenusForPeriodParserComponentImpl extends FichierMenusParserComponent {
 
       val (du, au) = parseTitleDate(titre)
 
-      MenusForPeriod(du, au, menus.map(parseIndividualTitleDate(_, du, au)))
+      val menuDates = allMenuDates(du, au)
+                      .map(d => (d.getDayOfMonth, d))
+                      .toMap
+
+      MenusForPeriod(du, au, menus.map(parseIndividualTitleDate(_, menuDates)))
     }
 
     private def parseTitleDate(title: String): (LocalDate, LocalDate) = {
@@ -70,14 +78,31 @@ trait MenusForPeriodParserComponentImpl extends FichierMenusParserComponent {
       }
     }
 
-    private def parseIndividualTitleDate(strMenu: String, du: LocalDate, au: LocalDate): Menu = {
+    private def parseIndividualTitleDate(strMenu: String, menuDates: Map[Int, LocalDate]): Menu = {
       val firstLF = strMenu.indexOf('\n')
 
-      val title = strMenu.subSequence(0, firstLF)
+      val title = strMenu.substring(0, firstLF)
 
-      val textMenu = strMenu.subSequence(firstLF + 1, strMenu.size)
+      val DayTitleRegexPattern(numJour) = title
 
-      Menu(null, textMenu.toString)
+      val dateMenu = menuDates(numJour.toInt)
+
+      val textMenu = strMenu.substring(firstLF + 1, strMenu.size)
+
+      Menu(dateMenu, textMenu)
+    }
+
+    private def allMenuDates(du: LocalDate, au: LocalDate): List[LocalDate] = {
+      @tailrec
+      def loop(acc: List[LocalDate], current: LocalDate): List[LocalDate] = {
+        if (current.isAfter(au)) {
+          acc
+        } else {
+          val newAcc = acc :+ current
+          loop(newAcc, current.plusDays(1))
+        }
+      }
+      loop(List(), du)
     }
 
   }
