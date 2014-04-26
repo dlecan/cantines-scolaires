@@ -1,3 +1,4 @@
+import models.Menu
 import org.joda.time.{DateTime, LocalDate}
 import org.specs2.mutable._
 
@@ -75,28 +76,22 @@ class FichierMenusParserSpec
 
     "Be able to parse a title with two dates and only one month" in new TestComponent {
 
-      val result = menusParser.parse("Menus du 2 au 27 septembre",
+      val menus = menusParser.parse("Menus du 2 au 27 septembre",
         List(expectedStrMenu1PDF1, expectedStrMenu2PDF1, expectedStrMenu3PDF1))
 
-      result.du === buildLocalDate(9, 2)
-      result.au === buildLocalDate(9, 27)
-
-      result.menus(0) === expectedMenu1PDF1
-      result.menus(1) === expectedMenu2PDF1
-      result.menus(2) === expectedMenu3PDF1
+      menus(0) === expectedMenu1PDF1
+      menus(1) === expectedMenu2PDF1
+      menus(2) === expectedMenu3PDF1
     }
 
     "Be able to parse a title with two dates and two months" in new TestComponent {
 
-      val result = menusParser.parse("Menus du 27 janvier au 21 février",
+      val menus = menusParser.parse("Menus du 27 janvier au 21 février",
         List(expectedStrMenu1PDF2, expectedStrMenu2PDF2, expectedStrMenu3PDF2))
 
-      result.du === buildLocalDate(1, 27)
-      result.au === buildLocalDate(2, 21)
-
-      result.menus(0) === expectedMenu1PDF2
-      result.menus(1) === expectedMenu2PDF2
-      result.menus(2) === expectedMenu3PDF2
+      menus(0) === expectedMenu1PDF2
+      menus(1) === expectedMenu2PDF2
+      menus(2) === expectedMenu3PDF2
     }
 
   }

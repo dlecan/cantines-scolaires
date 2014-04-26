@@ -7,10 +7,7 @@ import com.itextpdf.text.Rectangle
 import org.joda.time.{LocalDate, DateTime}
 import org.joda.time.format.DateTimeFormatterBuilder
 import scala.annotation.tailrec
-
-case class Menu(date: LocalDate, menu: String)
-
-case class MenusForPeriod(du: LocalDate, au: LocalDate, menus: List[Menu])
+import models.Menu
 
 trait FichierMenusParserComponent {
 
@@ -19,7 +16,7 @@ trait FichierMenusParserComponent {
 }
 
 trait MenusForPeriodParser {
-  def parse(titre: String, menus: List[String]): MenusForPeriod
+  def parse(titre: String, menus: List[String]): List[Menu]
 }
 
 trait MenusForPeriodParserComponentImpl extends FichierMenusParserComponent {
@@ -47,7 +44,7 @@ trait MenusForPeriodParserComponentImpl extends FichierMenusParserComponent {
 
     import FichierMenusParserImpl._
 
-    override def parse(titre: String, menus: List[String]): MenusForPeriod = {
+    override def parse(titre: String, menus: List[String]): List[Menu] = {
 
       val (du, au) = parseTitleDate(titre)
 
@@ -55,7 +52,7 @@ trait MenusForPeriodParserComponentImpl extends FichierMenusParserComponent {
                       .map(d => (d.getDayOfMonth, d))
                       .toMap
 
-      MenusForPeriod(du, au, menus.map(parseIndividualTitleDate(_, menuDates)))
+      menus.map(parseIndividualTitleDate(_, menuDates))
     }
 
     private def parseTitleDate(title: String): (LocalDate, LocalDate) = {
