@@ -3,7 +3,7 @@ import org.joda.time.{DateTime, LocalDate}
 import org.specs2.mutable._
 
 import org.specs2.specification.Scope
-import parsers._
+import pdf._
 
 trait DataSet {
 

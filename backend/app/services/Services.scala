@@ -1,7 +1,7 @@
 package services
 
 import repositories.MenuRepositoryComponent
-import parsers.{PdfParserComponent, FichierMenusParserComponent}
+import pdf.{PdfParserComponent, FichierMenusParserComponent}
 import play.api.{Logger, Play}
 import play.api.Play.current
 import java.net.URL

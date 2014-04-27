@@ -1,4 +1,4 @@
-package parsers
+package pdf
 
 import java.net.URL
 import com.itextpdf.text.pdf.PdfReader

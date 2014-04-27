@@ -1,6 +1,6 @@
 package appconfig
 
-import parsers.{MenusForPeriodParserComponentImpl, ITextPdfParserComponent, FichierMenusParserComponent, PdfParserComponent}
+import pdf.{MenusForPeriodParserComponentImpl, ITextPdfParserComponent, FichierMenusParserComponent, PdfParserComponent}
 import repositories.MenuRepositoryComponent
 import repositories.MenuRepositoryComponentImpl
 import services.{ServicesComponentImpl, ServicesComponent}
