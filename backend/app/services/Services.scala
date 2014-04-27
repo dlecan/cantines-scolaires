@@ -1,9 +1,9 @@
 package services
 
+import helpers.LoggingComponent
 import repositories.MenuRepositoryComponent
 import pdf.{PdfParserComponent, FichierMenusParserComponent}
-import play.api.{Logger, Play}
-import play.api.Play.current
+import play.api.Logger
 import java.net.URL
 import scala.util.{Failure, Success, Try}
 
@@ -14,44 +14,39 @@ trait ServicesComponent {
 
 trait MenusService {
 
-  def loadCurrentMenus()
+  def extractAndSaveMenus(url: String)
 
 }
 
 trait ServicesComponentImpl extends ServicesComponent {
-  self: MenuRepositoryComponent
+  self: LoggingComponent
+    with MenuRepositoryComponent
     with FichierMenusParserComponent
     with PdfParserComponent =>
 
   override val menusService: MenusService = new MenusServiceImpl
 
   class MenusServiceImpl extends MenusService {
-    override def loadCurrentMenus(): Unit = {
+    override def extractAndSaveMenus(url: String): Unit = {
 
-      val maybeUrlCurrentPdf = Play.configuration.getString("menu.pdf.url-mois-courant")
+      log.info(s"Will parse $url")
 
-      maybeUrlCurrentPdf.foreach {
-        url =>
+      val tryResult = Try {
 
-          Logger.info(s"Will parse $url")
+        log.debug("Parsing pdf...")
+        val (titre, strMenus) = pdfParser.parsePdf(new URL(url))
+        log.debug(s"Pdf content: $titre\n$strMenus")
 
-          val tryResult = Try {
+        log.debug("Parsing menus...")
+        val menus = menusParser.parse(titre, strMenus)
 
-            Logger.debug("Parsing pdf...")
-            val (titre, strMenus) = pdfParser.parsePdf(new URL(url))
-            Logger.debug(s"Pdf content: $titre\n$strMenus")
+        menuRepository.saveAll(menus)
+        log.debug("Menus saved")
+      }
 
-            Logger.debug("Parsing menus...")
-            val menus = menusParser.parse(titre, strMenus)
-
-            menuRepository.saveAll(menus)
-            Logger.info("Menus saved")
-          }
-
-          tryResult match {
-            case Success(_) =>
-            case Failure(t) => Logger.error(s"Error while loading current PDF: $t.getMessage", t)
-          }
+      tryResult match {
+        case Success(_) => log.info("Menus extracted and saved")
+        case Failure(t) => log.error(s"Error while loading current PDF: $t.getMessage", t)
       }
     }
   }
