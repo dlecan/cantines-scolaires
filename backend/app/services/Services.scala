@@ -35,7 +35,7 @@ trait ServicesComponentImpl extends ServicesComponent {
 
           Logger.info(s"Will parse $url")
 
-          val execRes = Try {
+          val tryResult = Try {
 
             Logger.debug("Parsing pdf...")
             val (titre, strMenus) = pdfParser.parsePdf(new URL(url))
@@ -48,7 +48,7 @@ trait ServicesComponentImpl extends ServicesComponent {
             Logger.info("Menus saved")
           }
 
-          execRes match {
+          tryResult match {
             case Success(_) =>
             case Failure(t) => Logger.error(s"Error while loading current PDF: $t.getMessage", t)
           }
