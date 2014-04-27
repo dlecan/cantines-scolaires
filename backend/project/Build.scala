@@ -12,7 +12,8 @@ object ApplicationBuild extends Build {
     jdbc,
     anorm,
     "com.itextpdf" % "itextpdf" % "5.4.3",
-    "org.mockito" % "mockito-core" % "1.9.5"
+    "org.mockito" % "mockito-core" % "1.9.5",
+    "org.specs2" % "specs2_2.10" % "2.3.11"
   )
 
 
