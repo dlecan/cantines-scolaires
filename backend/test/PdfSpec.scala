@@ -1,3 +1,5 @@
+package pdf
+
 import models.Menu
 import org.joda.time.{DateTime, LocalDate}
 import org.specs2.mutable._
