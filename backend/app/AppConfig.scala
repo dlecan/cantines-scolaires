@@ -5,13 +5,13 @@ import repositories.MenuRepositoryComponent
 import repositories.MenuRepositoryComponentImpl
 import services.{ServicesComponentImpl, ServicesComponent}
 
-trait Registry
+trait Context
   extends PdfParserComponent
   with FichierMenusParserComponent
   with MenuRepositoryComponent
   with ServicesComponent
 
-trait ProdEnvironment extends Registry
+trait ProductionContext extends Context
   with ITextPdfParserComponent
   with MenusForPeriodParserComponentImpl
   with MenuRepositoryComponentImpl

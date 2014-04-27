@@ -1,10 +1,9 @@
 package controllers
 
-import appconfig.ProdEnvironment
-import play.api._
+import appconfig.ProductionContext
 import play.api.mvc._
 
-object Application extends Controller with ProdEnvironment  {
+object Application extends Controller with ProductionContext  {
 
   def menusCetteSemaine() = TODO
 
